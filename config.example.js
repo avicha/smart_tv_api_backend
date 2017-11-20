@@ -1,10 +1,10 @@
 module.exports = {
     server: {
-        port: 8888,
-        secret_key: 'fG0HASkgAqR4jQGAFlnWFXtwATi89EAw'
+        port: 80,
+        secret_key: ''
     },
     mongodb: {
-        connection_url: '119.23.127.94:27017',
+        connection_url: '127.0.0.1:27017',
         options: {
             appname: 'smart_tv',
             poolSize: 4,
