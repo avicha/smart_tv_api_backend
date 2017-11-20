@@ -1,0 +1,21 @@
+{
+  "name": "main_backend",
+  "version": "1.0.0",
+  "description": "smart_tv backend",
+  "main": "app.js",
+  "dependencies": {
+    "koa": "^2.4.1",
+    "koa-logger": "^3.1.0",
+    "koa-router": "^7.3.0",
+    "mongodb": "^2.2.33",
+    "request": "^2.83.0"
+  },
+  "devDependencies": {
+    "pm2": "^2.7.2"
+  },
+  "scripts": {
+    "dev": "pm2 start app.js --name smart_tv_dev --watch 0 --log-date-format=\"YYYY-MM-DD HH:mm:ss.SSSS Z\""
+  },
+  "author": "avicha",
+  "license": "ISC"
+}
