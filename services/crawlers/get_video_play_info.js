@@ -1,6 +1,6 @@
 let browser = require("webpage").create()
 browser.captureContent = [/text\/plain/, /application\/json/, /application\/vnd\.apple\.mpegurl/]
-browser.settings.userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36'
+
 
 let crawler_server = require("webserver").create()
 let timeout = 10000
@@ -12,8 +12,30 @@ let get_query = (qs) => {
     })
     return query
 }
+let time_records = {
+
+}
+browser.onResourceRequested = (resource, networkRequest) => {
+    let host
+    time_records[resource.url] = resource.time
+    resource.headers.forEach(header => {
+        if (header.name == 'Host') {
+            host = header.value
+        }
+    })
+    if (['r1.ykimg.com'].includes(host)) {
+        // networkRequest.abort()
+    }
+}
+let resource_time_record = (resource) => {
+    if (resource.stage == 'start') {
+        let dt = resource.time.getTime() - time_records[resource.url].getTime()
+        console.log(resource.url, dt, 'ms')
+    }
+}
 crawler_server.listen(9000, (req, res) => {
     console.log(req.url)
+    times = {}
     if (req.method == 'GET') {
         let is_send = false,
             body
@@ -39,6 +61,7 @@ crawler_server.listen(9000, (req, res) => {
                 switch (source) {
                     case '1':
                         browser.onResourceReceived = function(resource) {
+                            resource_time_record(resource)
                             if (~resource.url.indexOf('psid') && ~resource.url.indexOf('vkey') && resource.stage == 'end') {
                                 if (!is_send) {
                                     is_send = true
@@ -77,7 +100,9 @@ crawler_server.listen(9000, (req, res) => {
                         break
                     case '2':
                         if (req_query.return == 'm3u8') {
+                            browser.settings.userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1'
                             browser.onResourceReceived = function(resource) {
+                                resource_time_record(resource)
                                 if (~resource.url.indexOf('http://jx.maoyun.tv/url.php?xml=') && resource.stage == 'end') {
                                     if (!is_send) {
                                         is_send = true
@@ -113,7 +138,9 @@ crawler_server.listen(9000, (req, res) => {
                         break
                     case '3':
                         if (req_query.return == 'm3u8') {
+                            browser.settings.userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1'
                             browser.onResourceReceived = function(resource) {
+                                resource_time_record(resource)
                                 if (~resource.url.indexOf('http://jx.maoyun.tv/url.php?xml=') && resource.stage == 'end') {
                                     if (!is_send) {
                                         is_send = true
