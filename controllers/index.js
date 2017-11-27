@@ -1,9 +1,10 @@
 const Router = require('koa-router')
+const proxy = require('koa-proxy')
+const convert = require('koa-convert')
 const commonController = new(require('./common'))()
 const userController = new(require('./user'))()
 const categoryController = new(require('./category'))()
 const tvController = new(require('./tv'))()
-const videoController = new(require('./video'))()
 
 module.exports = {
     init_app(app) {
@@ -33,13 +34,21 @@ module.exports = {
         tvRouter.get('/get_search_options', tvController.get_search_options)
         tvRouter.get('/search', tvController.search)
         tvRouter.get('/get_detail', tvController.get_detail)
-        tvRouter.get('/get_parts', tvController.get_parts)
+        tvRouter.get('/get_videos', tvController.get_videos)
         app.use(tvRouter.routes())
 
         const videoRouter = new Router({
             prefix: '/api/video'
         })
-        videoRouter.get('/get_play_info', videoController.get_play_info)
+        videoRouter.get('/get_play_info', convert(proxy({
+            host: 'http://127.0.0.1:9000',
+            jar: true,
+            requestOptions: {
+                headers: {
+                    Host: '127.0.0.1:9000'
+                }
+            }
+        })))
         app.use(videoRouter.routes())
     }
 }

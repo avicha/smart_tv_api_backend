@@ -2,7 +2,7 @@ const BaseController = require('./base')
 
 module.exports = class CategoryController extends BaseController {
     async create(ctx) {
-        categories = [{
+        let categories = [{
             "type": "tv",
             "icon": "",
             "name": "电视剧",

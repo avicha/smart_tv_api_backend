@@ -1,5 +1,6 @@
 const BaseController = require('./base')
 const ObjectID = require('mongodb').ObjectID
+const tv_service = require('../services/tv')
 
 module.exports = class TVController extends BaseController {
     get_search_options(ctx) {
@@ -163,9 +164,9 @@ module.exports = class TVController extends BaseController {
         let page = parseInt(ctx.request.query.page || 1)
         let rows = parseInt(ctx.request.query.rows || 24)
         let sort = ctx.request.query.sort || 'new'
-        let query = { 'category': 'tv' }
+        let query = {}
         let resource_query = { 'status': { '$not': { '$eq': -1 } } }
-        let fields_arr = ['_id', 'name', 'resources.id', 'resources.source', 'resources.folder', 'resources.actors', 'resources.is_vip', 'resources.status']
+        let fields_arr = ['_id', 'name', 'resources.album_id', 'resources.source', 'resources.folder', 'resources.actors', 'resources.is_vip', 'resources.status']
         let fields = {}
         fields_arr.forEach(key => { fields[key] = 1 })
         let query_tags = []
@@ -173,15 +174,20 @@ module.exports = class TVController extends BaseController {
             query.name = { '$regex': keywords }
         }
         if (type && ~type) {
-            query_tags.push(parseInt(type))
+            query_tags.push(type)
         }
         if (region && ~region) {
-            query_tags.push(parseInt(region))
+            query_tags.push(region)
         }
         if (query_tags.length) {
             query.tags = { '$all': query_tags }
         }
-        is_vip == '0' ? (resource_query.is_vip = false) : (is_vip == '1' ? (resource_query.is_vip = true) : null)
+        if (is_vip == '0') {
+            resource_query.is_vip = false
+        }
+        if (is_vip == '1') {
+            resource_query.is_vip = true
+        }
         if (years) {
             let start_time, end_time
             if (/^\d{4}$/.test(years)) {
@@ -210,29 +216,34 @@ module.exports = class TVController extends BaseController {
         } else {
             sorts = { 'resources.publish_date': -1, 'resources.created_at': 1 }
         }
-        let total_rows = await ctx.smart_tv_db.collection('videos').count(query)
-        let result = await ctx.smart_tv_db.collection('videos').find(query, fields, { skip: (page - 1) * rows, limit: rows, sort: sorts }).toArray()
-        console.log(query, total_rows)
-        ctx.body = super.success_with_list_result(total_rows, result)
+        let total_rows = await ctx.smart_tv_db.collection('tvs').count(query)
+        let tv_list = await ctx.smart_tv_db.collection('tvs').find(query, fields, { skip: (page - 1) * rows, limit: rows, sort: sorts }).toArray()
+        tv_list.forEach(tv => {
+            tv_service.set_best_resource(tv)
+        })
+        console.log(JSON.stringify(query), total_rows)
+        ctx.body = super.success_with_list_result(total_rows, tv_list)
     }
     async get_detail(ctx) {
-        let id = ctx.request.query.id
+        let album_id = ctx.request.query.album_id
+        let source = parseInt(ctx.request.query.source)
+        let query = { resources: { '$elemMatch': { album_id, source } } }
         let fields = {}
-        let fields_arr = ['_id', 'name', 'resources.id', 'resources.source', 'resources.status', 'resources.current_part', 'resources.part_count', 'resources.director', 'resources.alias', 'resources.types', 'resources.desc', 'resources.actors_detail', 'resources.actors', 'resources.update_notify_desc', 'resources.score', 'resources.publish_date', 'resources.folder', 'resources.region', 'resources.is_vip']
+        let fields_arr = ['_id', 'name', 'resources.album_id', 'resources.source', 'resources.status', 'resources.current_part', 'resources.part_count', 'resources.director', 'resources.alias', 'resources.types', 'resources.desc', 'resources.actors_detail', 'resources.actors', 'resources.update_notify_desc', 'resources.score', 'resources.publish_date', 'resources.folder', 'resources.region', 'resources.is_vip']
         fields_arr.forEach(key => { fields[key] = 1 })
-        let result = await ctx.smart_tv_db.collection('videos').findOne({ _id: ObjectID(id) }, fields)
-        ctx.body = super.success_with_result(result)
+        let tv = await ctx.smart_tv_db.collection('tvs').findOne(query, fields)
+        if (tv) {
+            let resource = tv.resources.find(resource => { return resource.album_id == album_id && resource.source == source })
+            tv.resource = resource
+            delete tv.resources
+        }
+        ctx.body = super.success_with_result(tv)
     }
-    async get_parts(ctx) {
-        let id = ctx.request.query.id
-        let source = ctx.request.query.source
-        let query = { 'id': id, 'source': parseInt(source) }
-        let video_parts = await ctx.smart_tv_db.collection('video_parts').findOne(query)
-        let videos = video_parts.parts
-        videos.forEach(video => {
-            video.id = id
-            video.source = source
-        })
+    async get_videos(ctx) {
+        let album_id = ctx.request.query.album_id
+        let source = parseInt(ctx.request.query.source)
+        let query = { album_id, source }
+        let videos = await ctx.smart_tv_db.collection('videos').find(query).toArray()
         ctx.body = super.success_with_list_result(videos.length, videos)
     }
 }

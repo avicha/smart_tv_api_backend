@@ -5,16 +5,17 @@
   "main": "app.js",
   "dependencies": {
     "koa": "^2.4.1",
+    "koa-convert": "^1.2.0",
     "koa-logger": "^3.1.0",
+    "koa-proxy": "^0.9.0",
     "koa-router": "^7.3.0",
     "mongodb": "^2.2.33",
+    "pm2": "^2.7.2",
     "request": "^2.83.0"
   },
-  "devDependencies": {
-    "pm2": "^2.7.2"
-  },
+  "devDependencies": {},
   "scripts": {
-    "dev": "pm2 start app.js --name smart_tv_dev --watch 0 --log-date-format=\"YYYY-MM-DD HH:mm:ss.SSSS Z\"",
+    "dev": "pm2 start app.js --name smart_tv_dev --watch --log-date-format=\"YYYY-MM-DD HH:mm:ss.SSSS Z\"",
     "prod": "pm2 start app.js --name smart_tv -i max --log-date-format=\"YYYY-MM-DD HH:mm:ss.SSSS Z\""
   },
   "author": "avicha",
