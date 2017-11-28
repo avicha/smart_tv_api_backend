@@ -13,8 +13,7 @@
     "request": "^2.83.0"
   },
   "devDependencies": {
-    "pm2": "^2.7.2",
-    "slimerjs": "^0.10.3"
+    "pm2": "^2.7.2"
   },
   "scripts": {
     "dev": "pm2 start app.js --name smart_tv_dev --watch --log-date-format=\"YYYY-MM-DD HH:mm:ss.SSSS Z\"",
