@@ -1,5 +1,7 @@
-let request = require('request')
-let qs = require('qs')
+const request = require('request')
+const qs = require('querystring')
+const path = require('path')
+
 let $xx = function(a, b, d, e, f, g) {
     let magic = "123456"
     if (g.length < 3)
@@ -144,6 +146,22 @@ class QQCrawler {
                     }
                 }
 
+            })
+        })
+    }
+    static crawl_video_url(video) {
+        let url = video.url
+        return new Promise((resolve, reject) => {
+            request.get({ uri: url }, (error, response, body) => {
+                if (error && response.statusCode != 200) {
+                    reject(error || new Error(body))
+                } else {
+                    let dirname = path.dirname(url)
+                    body.replace(/(.*)ver=4/g, (match) => {
+                        return `${dirname}/${match}`
+                    })
+                    resolve(body)
+                }
             })
         })
     }

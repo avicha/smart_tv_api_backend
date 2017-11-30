@@ -1,4 +1,5 @@
 const BaseController = require('./base')
+const config = require('../config')
 const video_source = require('../const/video_source')
 const YoukuCrawler = require('../services/crawlers/youku')
 const QQCrawler = require('../services/crawlers/qq')
@@ -22,6 +23,7 @@ module.exports = class VideoController extends BaseController {
                 for (let promise of promises) {
                     let video = await promise
                     if (video) {
+                        video.url = `${config.app_url}/api/video/get_play_url?video_id=${video_id}&album_id=${album_id}&source=${source}&type=${video.type}`
                         videos.push(video)
                     }
                 }
@@ -40,10 +42,17 @@ module.exports = class VideoController extends BaseController {
         let video_id = ctx.request.query.video_id
         let album_id = ctx.request.query.album_id
         let source = parseInt(ctx.request.query.source)
+        let type = ctx.request.query.type
         let body = ''
         switch (source) {
             case video_source.IQIYI:
                 body = await MaoyunCrawler.get_video_play_url(`http://www.iqiyi.com/${video_id}.html`)
+                break
+            case video_source.QQ:
+                let video = await QQCrawler.proxyhttp(album_id, video_id, type).catch(e => {})
+                if (video) {
+                    body = await QQCrawler.crawl_video_url(video)
+                }
                 break
         }
         ctx.body = body
