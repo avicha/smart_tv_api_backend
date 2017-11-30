@@ -243,7 +243,7 @@ module.exports = class TVController extends BaseController {
         let album_id = ctx.request.query.album_id
         let source = parseInt(ctx.request.query.source)
         let query = { album_id, source }
-        let videos = await ctx.smart_tv_db.collection('videos').find(query).toArray()
+        let videos = await ctx.smart_tv_db.collection('videos').find(query, null, { sort: { sequence: 1 } }).toArray()
         ctx.body = super.success_with_list_result(videos.length, videos)
     }
 }

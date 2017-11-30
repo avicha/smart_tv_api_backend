@@ -5,6 +5,7 @@ const commonController = new(require('./common'))()
 const userController = new(require('./user'))()
 const categoryController = new(require('./category'))()
 const tvController = new(require('./tv'))()
+const videoController = new(require('./video'))()
 
 module.exports = {
     init_app(app) {
@@ -40,15 +41,8 @@ module.exports = {
         const videoRouter = new Router({
             prefix: '/api/video'
         })
-        videoRouter.get('/get_play_info', convert(proxy({
-            host: 'http://127.0.0.1:9000',
-            jar: true,
-            requestOptions: {
-                headers: {
-                    Host: '127.0.0.1:9000'
-                }
-            }
-        })))
+        videoRouter.get('/get_play_info', videoController.get_play_info)
+        videoRouter.get('/get_play_url', videoController.get_play_url)
         app.use(videoRouter.routes())
     }
 }
