@@ -157,7 +157,7 @@ class QQCrawler {
                     reject(error || new Error(body))
                 } else {
                     let dirname = path.dirname(url)
-                    body.replace(/(.*)ver=4/g, (match) => {
+                    body = body.replace(/(.*)ver=4/g, (match) => {
                         return `${dirname}/${match}`
                     })
                     resolve(body)
