@@ -9,7 +9,6 @@ const config = require('./config')
 
 app.keys = [config.server.secret_key]
 app.use(logger())
-app.use(koaBody())
 exceptions.init_app(app)
 mongodb.getDB('smart_tv', config.mongodb).then(smart_tv_db => {
     app.context.smart_tv_db = smart_tv_db
