@@ -9,6 +9,7 @@ class MaoyunCrawler {
             weight: 4,
             type: 'fhd',
             type_text: '蓝光',
+            duration: 0,
             lang: 'default',
             lang_text: '默认',
             url: `${config.app_url}/api/video/get_play_url?video_id=${video_id}&source=${video_source.IQIYI}`

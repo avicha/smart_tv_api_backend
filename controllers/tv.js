@@ -212,9 +212,9 @@ module.exports = class TVController extends BaseController {
         query.resources = { '$elemMatch': resource_query }
         let sorts
         if (sort == 'hot') {
-            sorts = { 'resources.play_count': -1, 'resources.created_at': 1 }
+            sorts = { 'resources.status': 1, 'resources.play_count': -1, 'resources.created_at': 1 }
         } else {
-            sorts = { 'resources.publish_date': -1, 'resources.created_at': 1 }
+            sorts = { 'resources.status': 1, 'resources.publish_date': -1, 'resources.created_at': 1 }
         }
         let total_rows = await ctx.smart_tv_db.collection('tvs').count(query)
         let tv_list = await ctx.smart_tv_db.collection('tvs').find(query, fields, { skip: (page - 1) * rows, limit: rows, sort: sorts }).toArray()

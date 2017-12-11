@@ -113,6 +113,7 @@ class QQCrawler {
                                         type: type,
                                         width: vi.vw,
                                         height: vi.vh,
+                                        duration: Number(vi.td) * 1000,
                                         lang: ~vi.ti.indexOf('粤语') ? 'yueyu' : (~vi.ti.indexOf('国语') ? 'guoyu' : 'default'),
                                         lang_text: ~vi.ti.indexOf('粤语') ? '粤语' : (~vi.ti.indexOf('国语') ? '国语' : '默认'),
                                         url: vi.ul.ui[0].url + vi.ul.ui[0].hls.pt

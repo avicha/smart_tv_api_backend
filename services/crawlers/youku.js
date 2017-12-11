@@ -22,7 +22,6 @@ class YoukuCrawler {
     static get_ups_info(video_id, type = null) {
         return new Promise((resolve, reject) => {
             YoukuCrawler.get_cna().then(cna => {
-                console.log(cna)
                 let payload = {
                     vid: video_id,
                     ccode: '0508',
@@ -41,52 +40,34 @@ class YoukuCrawler {
                             let videos = stream.filter(video => {
                                 return ['mp4sd', 'mp4hd', 'mp4hd2v2', 'mp4hd3v2'].includes(video.stream_type)
                             }).map(video => {
+                                let video_obj = {
+                                    width: video.width,
+                                    height: video.height,
+                                    duration: video.milliseconds_video,
+                                    lang: video.audio_lang,
+                                    lang_text: YoukuCrawler.convert_lang_text(video.audio_lang),
+                                    url: video.m3u8_url
+                                }
                                 switch (video.stream_type) {
                                     case 'mp4sd':
-                                        return {
-                                            weight: 1,
-                                            type: 'sd',
-                                            type_text: '标清',
-                                            width: video.width,
-                                            height: video.height,
-                                            lang: video.audio_lang,
-                                            lang_text: YoukuCrawler.convert_lang_text(video.audio_lang),
-                                            url: video.m3u8_url
-                                        }
+                                        video_obj.weight = 1
+                                        video_obj.type = 'sd'
+                                        video_obj.type_text = '标清'
+                                        break
                                     case 'mp4hd':
-                                        return {
-                                            weight: 2,
-                                            type: 'hd',
-                                            type_text: '高清',
-                                            width: video.width,
-                                            height: video.height,
-                                            lang: video.audio_lang,
-                                            lang_text: YoukuCrawler.convert_lang_text(video.audio_lang),
-                                            url: video.m3u8_url
-                                        }
+                                        video_obj.weight = 2
+                                        video_obj.type = 'hd'
+                                        video_obj.type_text = '高清'
                                     case 'mp4hd2v2':
-                                        return {
-                                            weight: 3,
-                                            type: 'shd',
-                                            type_text: '超清',
-                                            width: video.width,
-                                            height: video.height,
-                                            lang: video.audio_lang,
-                                            lang_text: YoukuCrawler.convert_lang_text(video.audio_lang),
-                                            url: video.m3u8_url
-                                        }
+                                        video_obj.weight = 3
+                                        video_obj.type = 'shd'
+                                        video_obj.type_text = '超清'
                                     case 'mp4hd3v2':
-                                        return {
-                                            weight: 4,
-                                            type: 'fhd',
-                                            type_text: '蓝光',
-                                            width: video.width,
-                                            height: video.height,
-                                            lang: video.audio_lang,
-                                            lang_text: YoukuCrawler.convert_lang_text(video.audio_lang),
-                                            url: video.m3u8_url
-                                        }
+                                        video_obj.weight = 4
+                                        video_obj.type = 'fhd'
+                                        video_obj.type_text = '蓝光'
                                 }
+                                return video_obj
                             })
                             if (type) {
                                 let video = videos.filter(video => {

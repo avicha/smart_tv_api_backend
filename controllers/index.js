@@ -6,6 +6,7 @@ const userController = new(require('./user'))()
 const categoryController = new(require('./category'))()
 const tvController = new(require('./tv'))()
 const videoController = new(require('./video'))()
+const didiController = new(require('./didi'))()
 
 module.exports = {
     init_app(app) {
@@ -44,5 +45,12 @@ module.exports = {
         videoRouter.get('/get_play_info', videoController.get_play_info)
         videoRouter.get('/get_play_url', videoController.get_play_url)
         app.use(videoRouter.routes())
+
+        const didiRouter = new Router({
+            prefix: '/api/didi'
+        })
+        didiRouter.get('/get_gift', didiController.get_gift)
+        didiRouter.post('/order_contact', didiController.order_contact)
+        app.use(didiRouter.routes())
     }
 }
