@@ -1,5 +1,4 @@
 const Router = require('koa-router')
-const koaBody = require('koa-body')
 const commonController = new(require('./common'))()
 const userController = new(require('./user'))()
 const categoryController = new(require('./category'))()
@@ -49,7 +48,7 @@ module.exports = {
             prefix: '/api/didi'
         })
         didiRouter.get('/get_gift', didiController.get_gift)
-        didiRouter.post('/order_contact', koaBody(), didiController.order_contact)
+        didiRouter.post('/order_contact', didiController.order_contact)
         app.use(didiRouter.routes())
     }
 }
