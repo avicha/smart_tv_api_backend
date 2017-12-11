@@ -7,39 +7,49 @@ module.exports = class DidiController extends BaseController {
             '1': 1,
             '2': 118,
             '3': 218,
-            '4': 388,
-            '5': 500
+            '4': 388
         }
-        let result = await ctx.smart_tv_db.collection('didi_prize').aggregate({ $group: { _id: 'type', count: { $sum: 1 } } })
+        let result = await ctx.smart_tv_db.collection('didi_prize').aggregate([{ $group: { _id: '$type', count: { $sum: 1 } } }]).toArray()
         let sum = 0
         result.forEach(group => {
             prize_count[group._id] -= group.count
             if (prize_count[group._id] < 0) {
                 prize_count[group._id] = 0
             }
-            sum += prize_count[group._id]
         })
-        let r = Math.ceil(Math.random() * sum)
-        let s = [],
-            type = 5
-        for (let i = 0; i <= 5; i++) {
-            if (!i) {
-                s[i] = 0
-            } else {
-                s[i] = s[i - 1] + prize_count[i]
-                if (r > s[i - 1] && r <= s[i]) {
-                    type = i
-                    break
+        for (let key in prize_count) {
+            sum += prize_count[key];
+        }
+        if (!sum) {
+            ctx.body = super.success_with_result({
+                _id: Date.now(),
+                type: 5,
+                is_used: false,
+                created_at: Date.now()
+            })
+        } else {
+            let r = Math.ceil(Math.random() * sum)
+            let s = [],
+                type = 5
+            for (let i = 0; i <= 4; i++) {
+                if (!i) {
+                    s[i] = 0
+                } else {
+                    s[i] = s[i - 1] + prize_count[i]
+                    if (r > s[i - 1] && r <= s[i]) {
+                        type = i
+                        break
+                    }
                 }
             }
+            let order = {
+                type,
+                is_used: false,
+                created_at: Date.now()
+            }
+            let insert_result = await ctx.smart_tv_db.collection('didi_order').insertOne(order)
+            ctx.body = super.success_with_result(order)
         }
-        let order = {
-            type,
-            is_used: false,
-            created_at: Date.now()
-        }
-        let insert_result = await ctx.smart_tv_db.collection('didi_order').insertOne(order)
-        ctx.body = super.success_with_result(insert_result)
     }
     async order_contact(ctx) {
         let order_id = ctx.request.body.order_id
