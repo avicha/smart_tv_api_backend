@@ -48,6 +48,8 @@ module.exports = class DidiController extends BaseController {
                 created_at: Date.now()
             }
             let insert_result = await ctx.smart_tv_db.collection('didi_order').insertOne(order)
+            order.order_id = order._id
+            delete order._id
             ctx.body = super.success_with_result(order)
         }
     }
