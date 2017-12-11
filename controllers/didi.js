@@ -55,7 +55,11 @@ module.exports = class DidiController extends BaseController {
     }
     async order_contact(ctx) {
         let order_id = ctx.request.body.order_id
-        let contact = ctx.request.body.contact
+        let contact = {
+            name: ctx.request.body.name,
+            phone: ctx.request.body.phone,
+            address: ctx.request.body.address
+        }
         let order = await ctx.smart_tv_db.collection('didi_order').findOne({ _id: ObjectID(order_id) })
         if (!order || order.is_used) {
             ctx.body = super.error_with_message(403, '你已经兑换奖品了，欢迎关注滴滴优享')
@@ -70,7 +74,7 @@ module.exports = class DidiController extends BaseController {
             let count = await ctx.smart_tv_db.collection('didi_prize').count({ type: order.type })
             if (count < prize_count[order.type] || order.type != 5) {
                 let update_result = await ctx.smart_tv_db.collection('didi_order').updateOne({ _id: ObjectID(order_id) }, { $set: { is_used: true } })
-                let insert_result = await ctx.smart_tv_db.collection('didi_prize').insertOne({ order_id: order_id, type: order.type, contact: contact })
+                let insert_result = await ctx.smart_tv_db.collection('didi_prize').insertOne({ order_id: order_id, type: order.type, ...contact })
                 ctx.body = super.success()
             } else {
                 ctx.body = super.error_with_message(403, '抱歉，礼品已经派送完毕，欢迎关注滴滴优享')
