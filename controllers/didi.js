@@ -83,7 +83,7 @@ module.exports = class DidiController extends BaseController {
     }
     async get_js_config(ctx) {
         console.log(ctx.request.headers)
-        let js_config = await ctx.weixin_api.getJsConfig({ debug: true, jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'onMenuShareQQ', 'onMenuShareWeibo', 'onMenuShareQZone'], url: ctx.request.headers.referer })
+        let js_config = await ctx.weixin_api.getJsConfig({ debug: false, jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'onMenuShareQQ', 'onMenuShareWeibo', 'onMenuShareQZone'], url: ctx.request.headers.referer })
         ctx.body = super.success_with_result(js_config)
     }
 }
