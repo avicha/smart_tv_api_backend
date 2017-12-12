@@ -49,6 +49,7 @@ module.exports = {
         })
         didiRouter.get('/get_gift', didiController.get_gift)
         didiRouter.post('/order_contact', didiController.order_contact)
+        didiRouter.get('/get_js_config', didiController.get_js_config)
         app.use(didiRouter.routes())
     }
 }

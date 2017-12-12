@@ -4,6 +4,7 @@
   "description": "smart_tv backend",
   "main": "app.js",
   "dependencies": {
+    "co-wechat-api": "^3.3.2",
     "koa": "^2.4.1",
     "koa-bodyparser": "^4.2.0",
     "koa-convert": "^1.2.0",
