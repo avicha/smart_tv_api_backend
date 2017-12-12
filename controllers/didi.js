@@ -20,6 +20,8 @@ module.exports = class DidiController extends BaseController {
         for (let key in prize_count) {
             sum += prize_count[key];
         }
+        sum *= 200
+        console.log('prize_count: ', Object.values(prize_count).contact(sum).toString());
         if (!sum) {
             ctx.body = super.success_with_result({
                 _id: Date.now(),
