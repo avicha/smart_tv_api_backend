@@ -82,7 +82,7 @@ module.exports = class DidiController extends BaseController {
         }
     }
     async get_js_config(ctx) {
-        let js_config = await ctx.weixin_api.getJsConfig({ debug: false, jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'onMenuShareQQ', 'onMenuShareWeibo', 'onMenuShareQZone'] })
+        let js_config = await ctx.weixin_api.getJsConfig({ debug: true, jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'onMenuShareQQ', 'onMenuShareWeibo', 'onMenuShareQZone'], url: 'http://didi.jhcm.sh.cn/' })
         ctx.body = super.success_with_result(js_config)
     }
 }
