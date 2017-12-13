@@ -4,12 +4,13 @@ const ObjectID = require('mongodb').ObjectID
 module.exports = class DidiController extends BaseController {
     async get_gift(ctx) {
         let prize_count = {
-            '1': 1,
+            '1': 0,
             '2': 118,
             '3': 218,
             '4': 388
         }
         let result = await ctx.smart_tv_db.collection('didi_prize').aggregate([{ $group: { _id: '$type', count: { $sum: 1 } } }]).toArray()
+        console.log(result)
         let sum = 0
         result.forEach(group => {
             prize_count[group._id] -= group.count
