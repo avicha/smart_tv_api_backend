@@ -25,7 +25,7 @@ module.exports = class DidiController extends BaseController {
         console.log('prize_count: ', Object.values(prize_count).concat(sum).toString());
         if (!sum) {
             ctx.body = super.success_with_result({
-                _id: Date.now(),
+                order_id: Date.now(),
                 type: 5,
                 is_used: false,
                 created_at: Date.now()
