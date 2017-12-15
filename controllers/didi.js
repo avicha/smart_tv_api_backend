@@ -10,7 +10,6 @@ module.exports = class DidiController extends BaseController {
             '4': 388
         }
         let result = await ctx.smart_tv_db.collection('didi_prize').aggregate([{ $group: { _id: '$type', count: { $sum: 1 } } }]).toArray()
-        console.log(result)
         let sum = 0
         result.forEach(group => {
             prize_count[group._id] -= group.count
@@ -22,18 +21,10 @@ module.exports = class DidiController extends BaseController {
             sum += prize_count[key];
         }
         sum *= 200
-        console.log('prize_count: ', Object.values(prize_count).concat(sum).toString());
-        if (!sum) {
-            ctx.body = super.success_with_result({
-                order_id: Date.now(),
-                type: 5,
-                is_used: false,
-                created_at: Date.now()
-            })
-        } else {
+        let type = 5
+        if (sum) {
             let r = Math.ceil(Math.random() * sum)
-            let s = [],
-                type = 5
+            let s = []
             for (let i = 0; i <= 4; i++) {
                 if (!i) {
                     s[i] = 0
@@ -45,24 +36,27 @@ module.exports = class DidiController extends BaseController {
                     }
                 }
             }
-            let order = {
-                type,
-                is_used: false,
-                created_at: Date.now()
-            }
-            let insert_result = await ctx.smart_tv_db.collection('didi_order').insertOne(order)
-            order.order_id = order._id
-            delete order._id
-            ctx.body = super.success_with_result(order)
         }
+        console.log('prize_count: ', Object.values(prize_count).concat(sum).toString() + ',type:' + type);
+        let order = {
+            type,
+            is_used: false,
+            created_at: Date.now()
+        }
+        let insert_result = await ctx.smart_tv_db.collection('didi_order').insertOne(order)
+        order.order_id = order._id
+        delete order._id
+        ctx.body = super.success_with_result(order)
     }
     async order_contact(ctx) {
         let order_id = ctx.request.body.order_id
         let contact = {
             name: ctx.request.body.name,
             phone: ctx.request.body.phone,
-            address: ctx.request.body.address
+            address: ctx.request.body.address,
+            created_at: Date.now()
         }
+
         let order = await ctx.smart_tv_db.collection('didi_order').findOne({ _id: ObjectID(order_id) })
         if (!order || order.is_used) {
             ctx.body = super.error_with_message(403, '你已经兑换奖品了，欢迎关注滴滴优享')
@@ -74,6 +68,8 @@ module.exports = class DidiController extends BaseController {
                 '4': 388,
                 '5': 500
             }
+            console.log(order)
+            console.log(contact)
             let count = await ctx.smart_tv_db.collection('didi_prize').count({ type: order.type })
             if (count < prize_count[order.type] || order.type != 5) {
                 let update_result = await ctx.smart_tv_db.collection('didi_order').updateOne({ _id: ObjectID(order_id) }, { $set: { is_used: true } })
