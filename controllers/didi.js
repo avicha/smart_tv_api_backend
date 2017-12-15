@@ -126,7 +126,7 @@ module.exports = class DidiController extends BaseController {
                 default:
                     prize_type = '圣诞礼包券'
             }
-            resp += `${prize.name},${prize.phone},${prize.address},${prize_type},${new date(prize.created_at).toLocaleString()}`
+            resp += `${prize.name},${prize.phone},${prize.address},${prize_type},${new Date(prize.created_at).toLocaleString()}`
         })
         ctx.body = resp
     }
