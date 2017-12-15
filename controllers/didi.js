@@ -89,7 +89,7 @@ module.exports = class DidiController extends BaseController {
         let resp = '日期,PV,UV,中奖数\n'
         let start_date = new Date('2017-12-15').getTime()
         let end_date = new Date('2018-01-02').getTime()
-        for (; start_date < end_date;) {
+        for (; start_date <= end_date;) {
             let q = {
                 t: { $gt: start_date, $lte: start_date + 24 * 3600 * 1000 },
                 action: 'get_js_config',
