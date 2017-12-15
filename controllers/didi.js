@@ -86,6 +86,48 @@ module.exports = class DidiController extends BaseController {
         ctx.body = super.success_with_result(js_config)
     }
     async get_stat(ctx) {
-
+        let resp = '日期,PV,UV,中奖数\n'
+        let start_date = new Date('2017-12-15').getTime()
+        let end_date = new Date('2018-01-02').getTime()
+        for (; start_date < end_date;) {
+            let q = {
+                t: { $gt: start_date, $lte: start_date + 24 * 3600 * 1000 },
+                action: 'get_js_config',
+                from: /http:\/\/didi\.jhcm\.sh\.cn/
+            }
+            let pv = await ctx.smart_tv_db.collection('didi_stat').count(q)
+            let ips = await ctx.smart_tv_db.collection('didi_stat').aggregate([{ $match: q }, { $group: { _id: '$ip', count: { $sum: 1 } } }]).toArray()
+            let uv = ips.length
+            let prize_count = await ctx.smart_tv_db.collection('didi_stat').count({
+                t: { $gt: start_date, $lte: start_date + 24 * 3600 * 1000 },
+                action: 'get_gift',
+                from: /http:\/\/didi\.jhcm\.sh\.cn/
+            })
+            resp += `${new Date(start_date).toLocaleDateString()},${pv},${uv},${prize_count}\n`
+            start_date += 24 * 3600 * 1000
+        }
+        resp += '\n\n中奖名单\n\n'
+        let prizes = await ctx.smart_tv_db.collection('didi_prize').find({}).toArray()
+        prizes.forEach(prize => {
+            let prize_type = ''
+            switch (prize.type) {
+                case 1:
+                    prize_type = 'iPhoneX 一台!'
+                    break
+                case 2:
+                    prize_type = '圣诞款咖啡杯'
+                    break
+                case 3:
+                    prize_type = '圣诞款手机壳7+7P套装组'
+                    break
+                case 4:
+                    prize_type = '圣诞款环保包'
+                    break
+                default:
+                    prize_type = '圣诞礼包券'
+            }
+            resp += `${prize.name},${prize.phone},${prize.address},${prize_type},${new date(prize.created_at).toLocaleString()}`
+        })
+        ctx.body = resp
     }
 }
