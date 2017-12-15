@@ -50,6 +50,7 @@ module.exports = {
         didiRouter.get('/get_gift', didiController.get_gift)
         didiRouter.post('/order_contact', didiController.order_contact)
         didiRouter.get('/get_js_config', didiController.get_js_config)
+        didiRouter.get('/get_stat', didiController.get_stat)
         app.use(didiRouter.routes())
     }
 }

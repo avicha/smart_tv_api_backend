@@ -46,6 +46,7 @@ module.exports = class DidiController extends BaseController {
         let insert_result = await ctx.smart_tv_db.collection('didi_order').insertOne(order)
         order.order_id = order._id
         delete order._id
+        ctx.smart_tv_db.collection('didi_stat').insertOne({ ip: ctx.request.headers['x-real-ip'], action: 'get_gift', from: ctx.request.headers.referer, t: Date.now(), ua: ctx.request.headers['user-agent'], extra: { order } })
         ctx.body = super.success_with_result(order)
     }
     async order_contact(ctx) {
@@ -68,12 +69,11 @@ module.exports = class DidiController extends BaseController {
                 '4': 388,
                 '5': 500
             }
-            console.log(order)
-            console.log(contact)
             let count = await ctx.smart_tv_db.collection('didi_prize').count({ type: order.type })
             if (count < prize_count[order.type] || order.type != 5) {
                 let update_result = await ctx.smart_tv_db.collection('didi_order').updateOne({ _id: ObjectID(order_id) }, { $set: { is_used: true } })
                 let insert_result = await ctx.smart_tv_db.collection('didi_prize').insertOne({ order_id: order_id, type: order.type, ...contact })
+                ctx.smart_tv_db.collection('didi_stat').insertOne({ ip: ctx.request.headers['x-real-ip'], action: 'order_contact', from: ctx.request.headers.referer, t: Date.now(), ua: ctx.request.headers['user-agent'], extra: { order, contact } })
                 ctx.body = super.success()
             } else {
                 ctx.body = super.error_with_message(403, '抱歉，礼品已经派送完毕，欢迎关注滴滴优享')
@@ -82,6 +82,10 @@ module.exports = class DidiController extends BaseController {
     }
     async get_js_config(ctx) {
         let js_config = await ctx.weixin_api.getJsConfig({ debug: false, jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'onMenuShareQQ', 'onMenuShareWeibo', 'onMenuShareQZone'], url: ctx.request.headers.referer })
+        ctx.smart_tv_db.collection('didi_stat').insertOne({ ip: ctx.request.headers['x-real-ip'], action: 'get_js_config', from: ctx.request.headers.referer, t: Date.now(), ua: ctx.request.headers['user-agent'] })
         ctx.body = super.success_with_result(js_config)
+    }
+    async get_stat(ctx) {
+
     }
 }
