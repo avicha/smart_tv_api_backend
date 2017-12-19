@@ -20,7 +20,7 @@ module.exports = class DidiController extends BaseController {
         for (let key in prize_count) {
             sum += prize_count[key];
         }
-        sum *= 50
+        sum *= 20
         let type = 5
         if (sum) {
             let r = Math.ceil(Math.random() * sum)
@@ -126,7 +126,7 @@ module.exports = class DidiController extends BaseController {
                 default:
                     prize_type = '圣诞礼包券'
             }
-            resp += `${prize.name},${prize.phone},${prize.address},${prize_type},${new Date(prize.created_at).toLocaleString()}`
+            resp += `${prize.name},${prize.phone},${prize.address},${prize_type},${new Date(prize.created_at).toLocaleString()}\n`
         })
         ctx.body = resp
     }
