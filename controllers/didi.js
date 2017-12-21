@@ -7,7 +7,7 @@ module.exports = class DidiController extends BaseController {
         let from = ctx.request.headers.referer
         let now = Date.now()
         let ua = ctx.request.headers['user-agent']
-        let visit_record = ctx.smart_tv_db.collection('didi_stat').findOne({ ip: ip, action: 'get_js_config', from: from, t: { $gte: now - 5 * 60 * 1000 }, ua: ua })
+        let visit_record = await ctx.smart_tv_db.collection('didi_stat').findOne({ ip: ip, action: 'get_js_config', from: from, t: { $gte: now - 5 * 60 * 1000 }, ua: ua })
         let order
         if (visit_record) {
             let prize_count = {
