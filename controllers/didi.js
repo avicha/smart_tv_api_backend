@@ -3,51 +3,68 @@ const ObjectID = require('mongodb').ObjectID
 
 module.exports = class DidiController extends BaseController {
     async get_gift(ctx) {
-        let prize_count = {
-            '1': 0,
-            '2': 118,
-            '3': 218,
-            '4': 388
-        }
-        let result = await ctx.smart_tv_db.collection('didi_prize').aggregate([{ $group: { _id: '$type', count: { $sum: 1 } } }]).toArray()
-        let sum = 0
-        result.forEach(group => {
-            prize_count[group._id] -= group.count
-            if (prize_count[group._id] < 0) {
-                prize_count[group._id] = 0
+        let ip = ctx.request.headers['x-real-ip']
+        let from = ctx.request.headers.referer
+        let now = Date.now()
+        let ua = ctx.request.headers['user-agent']
+        let visit_record = ctx.smart_tv_db.collection('didi_stat').findOne({ ip: ip, action: 'get_js_config', from: from, t: { $gte: now - 5 * 60 * 1000 }, ua: ua })
+        let order
+        if (visit_record) {
+            let prize_count = {
+                '1': 0,
+                '2': 118,
+                '3': 218,
+                '4': 388
             }
-        })
-        for (let key in prize_count) {
-            sum += prize_count[key];
-        }
-        sum *= 20
-        let type = 5
-        if (sum) {
-            let r = Math.ceil(Math.random() * sum)
-            let s = []
-            for (let i = 0; i <= 4; i++) {
-                if (!i) {
-                    s[i] = 0
-                } else {
-                    s[i] = s[i - 1] + prize_count[i]
-                    if (r > s[i - 1] && r <= s[i]) {
-                        type = i
-                        break
+            let result = await ctx.smart_tv_db.collection('didi_prize').aggregate([{ $group: { _id: '$type', count: { $sum: 1 } } }]).toArray()
+            let sum = 0
+            result.forEach(group => {
+                prize_count[group._id] -= group.count
+                if (prize_count[group._id] < 0) {
+                    prize_count[group._id] = 0
+                }
+            })
+            for (let key in prize_count) {
+                sum += prize_count[key];
+            }
+            sum *= 20
+            let type = 5
+            if (sum) {
+                let r = Math.ceil(Math.random() * sum)
+                let s = []
+                for (let i = 0; i <= 4; i++) {
+                    if (!i) {
+                        s[i] = 0
+                    } else {
+                        s[i] = s[i - 1] + prize_count[i]
+                        if (r > s[i - 1] && r <= s[i]) {
+                            type = i
+                            break
+                        }
                     }
                 }
             }
+            console.log('prize_count: ', Object.values(prize_count).concat(sum).toString() + ',type:' + type);
+            order = {
+                type,
+                is_used: false,
+                created_at: now
+            }
+            let insert_result = await ctx.smart_tv_db.collection('didi_order').insertOne(order)
+            order.order_id = order._id
+            delete order._id
+            ctx.smart_tv_db.collection('didi_stat').insertOne({ ip: ip, action: 'get_gift', from: from, t: now, ua: ua, extra: { order } })
+            ctx.body = super.success_with_result(order)
+        } else {
+            order = {
+                order_id: now,
+                type: 5,
+                is_used: false,
+                created_at: now
+            }
+            console.error(`${ip}想非法访问!`)
+            ctx.body = super.success_with_result(order)
         }
-        console.log('prize_count: ', Object.values(prize_count).concat(sum).toString() + ',type:' + type);
-        let order = {
-            type,
-            is_used: false,
-            created_at: Date.now()
-        }
-        let insert_result = await ctx.smart_tv_db.collection('didi_order').insertOne(order)
-        order.order_id = order._id
-        delete order._id
-        ctx.smart_tv_db.collection('didi_stat').insertOne({ ip: ctx.request.headers['x-real-ip'], action: 'get_gift', from: ctx.request.headers.referer, t: Date.now(), ua: ctx.request.headers['user-agent'], extra: { order } })
-        ctx.body = super.success_with_result(order)
     }
     async order_contact(ctx) {
         let order_id = ctx.request.body.order_id
