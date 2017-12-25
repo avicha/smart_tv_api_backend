@@ -11,7 +11,7 @@ module.exports = class DidiController extends BaseController {
         let order
         if (visit_record) {
             let prize_count = {
-                '1': 0,
+                '1': 1,
                 '2': 118,
                 '3': 218,
                 '4': 388
@@ -27,7 +27,7 @@ module.exports = class DidiController extends BaseController {
             for (let key in prize_count) {
                 sum += prize_count[key];
             }
-            sum *= 20
+            sum *= 10
             let type = 5
             if (sum) {
                 let r = Math.ceil(Math.random() * sum)
