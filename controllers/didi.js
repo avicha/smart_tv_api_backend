@@ -27,7 +27,7 @@ module.exports = class DidiController extends BaseController {
             for (let key in prize_count) {
                 sum += prize_count[key];
             }
-            sum *= 10
+            sum *= 2
             let type = 5
             if (sum) {
                 let r = Math.ceil(Math.random() * sum)
